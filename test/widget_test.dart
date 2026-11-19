@@ -1,31 +1,50 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:projeto_novo/Principal.dart';
-
 import 'package:projeto_novo/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const Principal());
+  testWidgets('RecipeFinder inicia corretamente',
+          (WidgetTester tester) async {
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+        await tester.pumpWidget(const RecipeFinderApp());
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+        expect(find.text('RecipeFinder'), findsOneWidget);
+        expect(find.text('Olá, Chef!'), findsOneWidget);
+        expect(find.text('Explorar receitas'), findsOneWidget);
+      });
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
-  });
+  testWidgets('Navegação entre as telas principais',
+          (WidgetTester tester) async {
+
+        await tester.pumpWidget(const RecipeFinderApp());
+
+        // Acessa a pesquisa
+        await tester.tap(find.text('Pesquisar'));
+        await tester.pump();
+
+        expect(find.text('Pesquisar receitas'), findsOneWidget);
+
+        // Acessa os favoritos
+        await tester.tap(find.text('Favoritos'));
+        await tester.pump();
+
+        expect(find.text('Meus favoritos'), findsOneWidget);
+
+        // Retorna para Home
+        await tester.tap(find.text('Início'));
+        await tester.pump();
+
+        expect(find.text('Olá, Chef!'), findsOneWidget);
+      });
+
+  testWidgets('Abre a listagem de receitas',
+          (WidgetTester tester) async {
+
+        await tester.pumpWidget(const RecipeFinderApp());
+
+        await tester.tap(find.text('Explorar receitas'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Pizza Margherita'), findsOneWidget);
+      });
 }
