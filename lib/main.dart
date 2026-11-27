@@ -1,111 +1,127 @@
-
 import 'package:flutter/material.dart';
 
+import 'data/favorites_manager.dart';
+import 'models/recipe.dart';
+import 'services/recipe_service.dart';
+import 'telas/favorites_screen.dart';
 import 'telas/home_screen.dart';
+import 'telas/recipe_details.dart';
 import 'telas/recipes_screen.dart';
 import 'telas/search_screen.dart';
-import 'telas/favorites_screen.dart';
-import 'telas/recipe_details.dart';
-
 import 'widgets/navegacao_inferior.dart';
-import 'models/recipe.dart';
 
 void main() {
-  runApp(const RecipeFinderApp());
+  runApp(const MenueApp());
 }
 
-class RecipeFinderApp extends StatelessWidget {
-  const RecipeFinderApp({super.key});
+class MenueApp extends StatelessWidget {
+  const MenueApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Menuê',
-
+      title: 'Menue - Aplicativo de Receitas',
       theme: ThemeData(
         useMaterial3: true,
-        scaffoldBackgroundColor: const Color(0xFFFFF8F0),
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFFE96B43),
           primary: const Color(0xFFE96B43),
           surface: const Color(0xFFFFF8F0),
         ),
+        scaffoldBackgroundColor: const Color(0xFFFFF8F0),
         appBarTheme: const AppBarTheme(
           backgroundColor: Color(0xFFFFF8F0),
+          foregroundColor: Color(0xFF292524),
           elevation: 0,
           centerTitle: false,
         ),
       ),
-
-      home: const MainNavigation(),
+      home: const AppShell(),
     );
   }
 }
 
-class MainNavigation extends StatefulWidget {
-  const MainNavigation({super.key});
+class AppShell extends StatefulWidget {
+  const AppShell({super.key});
 
   @override
-  State<MainNavigation> createState() => _MainNavigationState();
+  State<AppShell> createState() => _AppShellState();
 }
 
-class _MainNavigationState extends State<MainNavigation> {
-  int selectedIndex = 0;
+class _AppShellState extends State<AppShell> {
+  final RecipeService _recipeService = RecipeService();
+  final FavoritesManager _favoritesManager = FavoritesManager();
 
-  void changeTab(int index) {
-    setState(() {
-      selectedIndex = index;
-    });
+  late Future<List<Recipe>> _recipesFuture;
+  int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _recipesFuture = _recipeService.getRecipes();
   }
 
-  void openDetails(Recipe recipe) {
-    Navigator.push(
-      context,
+  void _openDetails(Recipe recipe) {
+    Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => RecipeDetails(
+        builder: (_) => RecipeDetailsScreen(
           recipe: recipe,
+          favoritesManager: _favoritesManager,
         ),
       ),
     );
   }
 
-  void openRecipes() {
-    Navigator.push(
-      context,
+  void _openAllRecipes() {
+    Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => RecipesScreen(
-          onRecipeTap: openDetails,
+        builder: (_) => RecipesScreen(
+          recipeService: _recipeService,
+          onRecipeTap: _openDetails,
+          favoritesManager: _favoritesManager,
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _favoritesManager.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final pages = [
+      HomeScreen(
+        recipesFuture: _recipesFuture,
+        onExplore: _openAllRecipes,
+        onSearch: () => setState(() => _selectedIndex = 1),
+        onRecipeTap: _openDetails,
+        favoritesManager: _favoritesManager,
+      ),
+      SearchScreen(
+        recipeService: _recipeService,
+        onRecipeTap: _openDetails,
+        favoritesManager: _favoritesManager,
+      ),
+      FavoritesScreen(
+        favoritesManager: _favoritesManager,
+        onRecipeTap: _openDetails,
+      ),
+    ];
+
     return Scaffold(
       body: IndexedStack(
-        index: selectedIndex,
-        children: [
-          HomeScreen(
-            onExplore: openRecipes,
-            onSearch: () => changeTab(1),
-            onRecipeTap: openDetails,
-          ),
-
-          SearchScreen(
-            onRecipeTap: openDetails,
-          ),
-
-          FavoritesScreen(
-            onRecipeTap: openDetails,
-          ),
-        ],
+        index: _selectedIndex,
+        children: pages,
       ),
-
       bottomNavigationBar: NavegacaoInferior(
-        selectedIndex: selectedIndex,
-        onItemSelected: changeTab,
+        selectedIndex: _selectedIndex,
+        onItemSelected: (index) {
+          setState(() => _selectedIndex = index);
+        },
       ),
     );
   }

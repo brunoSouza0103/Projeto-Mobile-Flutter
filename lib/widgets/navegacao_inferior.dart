@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class NavegacaoInferior extends StatelessWidget {
@@ -18,7 +17,6 @@ class NavegacaoInferior extends StatelessWidget {
       onDestinationSelected: onItemSelected,
       backgroundColor: Colors.white,
       indicatorColor: const Color(0xFFFFE1D5),
-      elevation: 3,
       destinations: const [
         NavigationDestination(
           icon: Icon(Icons.home_outlined),
@@ -27,6 +25,7 @@ class NavegacaoInferior extends StatelessWidget {
         ),
         NavigationDestination(
           icon: Icon(Icons.search),
+          selectedIcon: Icon(Icons.search),
           label: 'Pesquisar',
         ),
         NavigationDestination(

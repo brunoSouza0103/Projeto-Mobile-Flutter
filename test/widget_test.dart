@@ -3,12 +3,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:projeto_novo/main.dart';
 
 void main() {
-  testWidgets('RecipeFinder inicia corretamente',
+  testWidgets('Menue inicia corretamente',
           (WidgetTester tester) async {
 
-        await tester.pumpWidget(const RecipeFinderApp());
+        await tester.pumpWidget(const MenueApp());
 
-        expect(find.text('RecipeFinder'), findsOneWidget);
+        expect(find.text('Menue'), findsOneWidget);
         expect(find.text('Olá, Chef!'), findsOneWidget);
         expect(find.text('Explorar receitas'), findsOneWidget);
       });
@@ -16,21 +16,18 @@ void main() {
   testWidgets('Navegação entre as telas principais',
           (WidgetTester tester) async {
 
-        await tester.pumpWidget(const RecipeFinderApp());
+        await tester.pumpWidget(const MenueApp());
 
-        // Acessa a pesquisa
         await tester.tap(find.text('Pesquisar'));
         await tester.pump();
 
         expect(find.text('Pesquisar receitas'), findsOneWidget);
 
-        // Acessa os favoritos
         await tester.tap(find.text('Favoritos'));
         await tester.pump();
 
         expect(find.text('Meus favoritos'), findsOneWidget);
 
-        // Retorna para Home
         await tester.tap(find.text('Início'));
         await tester.pump();
 
@@ -40,7 +37,7 @@ void main() {
   testWidgets('Abre a listagem de receitas',
           (WidgetTester tester) async {
 
-        await tester.pumpWidget(const RecipeFinderApp());
+        await tester.pumpWidget(const MenueApp());
 
         await tester.tap(find.text('Explorar receitas'));
         await tester.pumpAndSettle();

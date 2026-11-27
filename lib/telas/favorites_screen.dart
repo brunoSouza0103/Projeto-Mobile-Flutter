@@ -1,72 +1,55 @@
-
 import 'package:flutter/material.dart';
-import '../data/recipes_mock.dart';
+
+import '../data/favorites_manager.dart';
 import '../models/recipe.dart';
 import '../widgets/recipe_card.dart';
+import '../widgets/state_message.dart';
 
 class FavoritesScreen extends StatelessWidget {
+  final FavoritesManager favoritesManager;
   final ValueChanged<Recipe> onRecipeTap;
 
   const FavoritesScreen({
     super.key,
+    required this.favoritesManager,
     required this.onRecipeTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final favorites = recipesMock.take(2).toList();
-
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF8F0),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFFFF8F0),
-        title: const Text(
-          'Meus Favoritos',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-      ),
-      body: favorites.isEmpty
-          ? const Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.favorite_border,
-              size: 70,
-              color: Color(0xFFE96B43),
-            ),
-            SizedBox(height: 15),
-            Text(
-              'Nenhum há favorito ainda!',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Suas receitas favoritas aparecerão aqui.',
-              style: TextStyle(color: Colors.grey),
-            ),
-          ],
-        ),
-      )
-          : GridView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: favorites.length,
-        gridDelegate:
-        const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 14,
-          mainAxisSpacing: 14,
-          mainAxisExtent: 215,
-        ),
-        itemBuilder: (context, index) {
-          final recipe = favorites[index];
+      appBar: AppBar(title: const Text('Minhas favoritas')),
+      body: AnimatedBuilder(
+        animation: favoritesManager,
+        builder: (context, _) {
+          final favorites = favoritesManager.favorites;
 
-          return RecipeCard(
-            recipe: recipe,
-            onTap: () => onRecipeTap(recipe),
+          if (favorites.isEmpty) {
+            return const StateMessage(
+              icon: Icons.favorite_border,
+              title: 'Você ainda não tem favoritos',
+              message: 'Toque no coração de uma receita para salvá-la aqui.',
+            );
+          }
+
+          return GridView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: favorites.length,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 14,
+              mainAxisSpacing: 14,
+              mainAxisExtent: 218,
+            ),
+            itemBuilder: (context, index) {
+              final recipe = favorites[index];
+              return RecipeCard(
+                recipe: recipe,
+                isFavorite: true,
+                onTap: () => onRecipeTap(recipe),
+                onFavoriteTap: () => favoritesManager.removeFavorite(recipe.id),
+              );
+            },
           );
         },
       ),
